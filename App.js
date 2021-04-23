@@ -13,8 +13,10 @@ import {
 import Constants from "expo-constants";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
-import { Swipeable } from "react-native-gesture-handler";
+import { SwipeListView } from "react-native-swipe-list-view";
 // import ListItem from './List Item';
+
+//Add swipe list view
 
 const STORAGE_KEY = "to_do_list_key";
 
@@ -26,7 +28,20 @@ export default class App extends Component {
   state = {
     newListInput: "",
 
-    list: ["Chicken", "Green Beans", "Carrots"],
+    list: [
+      {
+        key: 1,
+        title: "Chicken",
+      },
+      {
+        key: 2,
+        title: "Green Beans",
+      },
+      {
+        key: 3,
+        title: "Carrots",
+      },
+    ],
 
     completedFolderButtonImage:
       "https://www.symbols.com/gi.php?type=1&id=1596&i=1",
@@ -35,7 +50,10 @@ export default class App extends Component {
 
   addNewListItem = () => {
     if (this.state.newListInput !== "")
-      this.state.list.push(this.state.newListInput);
+      this.state.list.push({
+        key: this.state.list.length + 1,
+        title: this.state.newListInput,
+      });
     this.setState({
       list: this.state.list,
       newListInput: "",
@@ -48,6 +66,7 @@ export default class App extends Component {
   };
 
   openCompletedFolder = () => {
+    // this.removeEverything();
     if (this.state.completedFolderOpen === false) {
       this.setState({
         completedFolderButtonImage:
@@ -107,14 +126,6 @@ export default class App extends Component {
     console.log("Retrieved data");
   }
 
-  // leftAction = () => {
-  //   return (
-  //     <View>
-  //       <Text>Test</Text>
-  //     </View>
-  //   );
-  // };
-
   render() {
     return (
       <View style={styles.container}>
@@ -132,12 +143,8 @@ export default class App extends Component {
 
         <ScrollView>
           {this.state.list.map((listItem) => (
-            //<Swipeable
-            // renderLeftActions={this.leftAction}
-            // onSwipeAbleLeftOpen={() => console.log("TEST :)")}
-            //>
-            <View style={styles.listContainer}>
-              <Text style={styles.listItem}>{listItem}</Text>
+            <View key={listItem.key} style={styles.listContainer}>
+              <Text style={styles.listItem}>{listItem.title}</Text>
 
               <View style={styles.completedButtonContainer}>
                 <TouchableHighlight
@@ -154,7 +161,6 @@ export default class App extends Component {
                 </TouchableHighlight>
               </View>
             </View>
-            //</Swipeable>
           ))}
 
           <View style={styles.newListItemContainer}>
