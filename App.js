@@ -16,7 +16,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { SwipeListView } from "react-native-swipe-list-view";
 // import ListItem from './List Item';
 
-//Add swipe list view
+//Add swipe list view react native swipeable https://www.npmjs.com/package/react-native-swipeable-row
 
 const STORAGE_KEY = "to_do_list_key";
 
@@ -66,7 +66,7 @@ export default class App extends Component {
   };
 
   openCompletedFolder = () => {
-    // this.removeEverything();
+    this.removeEverything();
     if (this.state.completedFolderOpen === false) {
       this.setState({
         completedFolderButtonImage:
