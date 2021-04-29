@@ -28,7 +28,13 @@ export const ListItem = (props) => {
       <View>
         {props.list.map((listItem) => (
           <View key={listItem.key} style={styles.listContainer}>
-            <Text style={styles.listItem}>{listItem.title}</Text>
+
+            <Swipeable
+            renderRightActions={this.renderRightActions}
+            renderLeftActions={this.renderLeftActions}>
+              <Text style={styles.listItem}>{listItem.title}</Text>
+            </Swipeable>
+            
 
             <View style={styles.completedButtonContainer}>
               <TouchableHighlight

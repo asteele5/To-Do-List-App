@@ -15,8 +15,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import { SwipeListView } from "react-native-swipe-list-view";
 import ListItem from './List Item';
+import Swipeable from 'react-native-gesture-handler/Swipeable';
 
-//Add swipe list view react native swipeable https://www.npmjs.com/package/react-native-swipeable-row
 
 const STORAGE_KEY = "to_do_list_key";
 
@@ -126,6 +126,7 @@ export default class App extends Component {
     console.log("Retrieved data");
   }
 
+
   render() {
     return (
       <View style={styles.container}>
@@ -142,7 +143,7 @@ export default class App extends Component {
         </View>
 
         <ScrollView>
-   
+
             <ListItem list={this.state.list} noteCompleted = {this.noteCompleted}/>
         
 
