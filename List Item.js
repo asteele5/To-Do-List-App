@@ -11,24 +11,46 @@ import {
   ScrollView,
 } from 'react-native';
 import Constants from 'expo-constants';
+import App from './App.js'
+import { List } from 'react-native-paper';
 
 let deviceWidth = Dimensions.get('window').width;
 // let deviceHeight = Math.round((Dimensions.width * 9) / 16);
 let deviceHeight = Dimensions.get('window').height;
 
-export default class ListItem extends Component {
+export const ListItem = (props) => {
 
-  render() {
+
 
 
     return (
 
       <View>
+        {props.list.map((listItem) => (
+          <View key={listItem.key} style={styles.listContainer}>
+            <Text style={styles.listItem}>{listItem.title}</Text>
+
+            <View style={styles.completedButtonContainer}>
+              <TouchableHighlight
+                style={styles.completedButton}
+                onPress={props.noteCompleted}
+              >
+                <Image
+                  source={{
+                    uri:
+                      "https://cdn1.iconfinder.com/data/icons/navigation-elements/512/round-empty-circle-function-512.png",
+                  }}
+                  style={styles.completedButtonImage}
+                />
+              </TouchableHighlight>
+            </View>
+          </View>
+        ))}
       </View>
+
       
 
     );
-  }
 }
 
 const styles = StyleSheet.create({
@@ -100,3 +122,5 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-end',  
     },
 });
+
+export default ListItem;

@@ -14,7 +14,7 @@ import Constants from "expo-constants";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import { SwipeListView } from "react-native-swipe-list-view";
-// import ListItem from './List Item';
+import ListItem from './List Item';
 
 //Add swipe list view react native swipeable https://www.npmjs.com/package/react-native-swipeable-row
 
@@ -142,26 +142,9 @@ export default class App extends Component {
         </View>
 
         <ScrollView>
-          {this.state.list.map((listItem) => (
-            <View key={listItem.key} style={styles.listContainer}>
-              <Text style={styles.listItem}>{listItem.title}</Text>
-
-              <View style={styles.completedButtonContainer}>
-                <TouchableHighlight
-                  style={styles.completedButton}
-                  onPress={this.noteCompleted}
-                >
-                  <Image
-                    source={{
-                      uri:
-                        "https://cdn1.iconfinder.com/data/icons/navigation-elements/512/round-empty-circle-function-512.png",
-                    }}
-                    style={styles.completedButtonImage}
-                  />
-                </TouchableHighlight>
-              </View>
-            </View>
-          ))}
+   
+            <ListItem list={this.state.list} noteCompleted = {this.noteCompleted}/>
+        
 
           <View style={styles.newListItemContainer}>
             <TextInput
