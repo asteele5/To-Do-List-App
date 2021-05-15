@@ -14,11 +14,11 @@ import Constants from "expo-constants";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import { SwipeListView } from "react-native-swipe-list-view";
-import ListItem from './List Item';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 
 
-const STORAGE_KEY = "to_do_list_key";
+const LIST_STORAGE_KEY = "to_do_list_key";
+const COMPLETED_STORAGE_KEY = "completed_key";
 
 let deviceWidth = Dimensions.get("window").width;
 // let deviceHeight = Math.round((Dimensions.width * 9) / 16);
@@ -43,9 +43,25 @@ export default class App extends Component {
       },
     ],
 
+
     completedFolderButtonImage:
       "https://www.symbols.com/gi.php?type=1&id=1596&i=1",
     completedFolderOpen: false,
+
+    completedList: [],
+
+    folderList: [
+
+      {
+        key: 1,
+        title: "Vegetables",
+      }
+
+    ],
+
+    newFolderVisible: false,
+
+
   };
 
   addNewListItem = () => {
@@ -53,17 +69,18 @@ export default class App extends Component {
       this.state.list.push({
         key: this.state.list.length + 1,
         title: this.state.newListInput,
+        completed: false,
       });
     this.setState({
       list: this.state.list,
       newListInput: "",
     });
+    console.log(this.state.list)
     this.change();
+    console.log(this.state.list)
   };
 
-  noteCompleted = () => {
-    alert("Noted marked as completed");
-  };
+  
 
   openCompletedFolder = () => {
     this.removeEverything();
@@ -82,9 +99,9 @@ export default class App extends Component {
     }
   };
 
-  save = async (items) => {
+  save = async (items, key) => {
     try {
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+      await AsyncStorage.setItem(key, JSON.stringify(items));
       console.log("Data saved");
     } catch (e) {
       alert("Failed to save data");
@@ -99,9 +116,11 @@ export default class App extends Component {
     }
   };
 
+
   retrieveData = async () => {
     try {
-      const listItems = await AsyncStorage.getItem(STORAGE_KEY);
+      const listItems = await AsyncStorage.getItem(LIST_STORAGE_KEY);
+      
       if (listItems !== null) {
         const parsedListItems = JSON.parse(listItems);
 
@@ -109,15 +128,33 @@ export default class App extends Component {
           list: parsedListItems,
         });
 
-        console.log("Retrieved data");
+        console.log("Retrieved list data");
       }
     } catch (e) {
-      alert("Unable to retrieve data");
+      alert("Unable to retrieve list data");
     }
+  
+
+    try {
+      const completedListItems = await AsyncStorage.getItem(COMPLETED_STORAGE_KEY);
+    if (completedListItems !== null) {
+      const parsedCompletedListItems = JSON.parse(completedListItems);
+
+      this.setState({
+        completedList: parsedCompletedListItems,
+      });
+
+      console.log("Retrieved completed list data");
+    }
+  } catch (e) {
+    alert("Unable to retrieve completed list data");
+  }
+
   };
 
   change = async () => {
-    this.save(this.state.list);
+    this.save(this.state.list, LIST_STORAGE_KEY);
+    this.save(this.state.completedList, COMPLETED_STORAGE_KEY);
     this.retrieveData();
   };
 
@@ -125,6 +162,8 @@ export default class App extends Component {
     this.retrieveData();
     console.log("Retrieved data");
   }
+
+
 
 
   render() {
@@ -138,14 +177,114 @@ export default class App extends Component {
           style={styles.background}
         />
 
-        <View>
-          <Text style={styles.folderName}>Grocery List</Text>
+        <View style={styles.header}>
+
+          <View style={styles.backButtonContainer}>
+            <Image
+              source={{
+                uri:
+                  "https://image.flaticon.com/icons/png/512/93/93634.png",
+              }}
+              style={styles.backButton}
+            />
+          </View>
+
+          <View style={styles.folderNameContainer}>
+            <Text style={styles.folderName}>Grocery List</Text>
+          </View>
+
+          <View style={styles.newFolderButtonContainer}>
+            <TouchableHighlight onPress={() => {
+
+  
+              alert('new folder created')
+
+              
+              }}>
+              <Image
+                source={{
+                  uri:
+                    "https://cdn4.iconfinder.com/data/icons/utilities-part-3/64/add_folder-512.png",
+                }}
+                style={styles.newFolderButton}
+              />
+            </TouchableHighlight>
+          </View>
+
         </View>
 
         <ScrollView>
 
-            <ListItem list={this.state.list} noteCompleted = {this.noteCompleted}/>
-        
+        <View>
+        {this.state.folderList.map((folder, i) => (
+          <View key={folder.key} style={styles.listContainer}>
+
+            <Text style={styles.listItem}>{folder.title}</Text>
+            
+
+            <View style={styles.completedButtonContainer}>
+              <TouchableHighlight
+                style={styles.completedButton}
+                onPress={() => {
+                  alert('Entered Folder')
+
+                  
+                }}
+              >
+              <Image
+                source={{
+                  uri:
+                    "https://www.symbols.com/gi.php?type=1&id=1596&i=1",
+                }}
+                style={styles.completedButtonImage}
+              />
+              </TouchableHighlight>
+            </View>
+          </View>
+          ))}
+        </View>  
+
+        <View>
+        {this.state.list.map((listItem, i) => (
+          <View key={listItem.key} style={styles.listContainer}>
+
+              <Text style={styles.listItem}>{listItem.title}</Text>
+            
+
+            <View style={styles.completedButtonContainer}>
+              <TouchableHighlight
+                style={styles.completedButton}
+                onPress={() => {
+                  // alert('Note marked as completed!')
+                  
+
+                  this.tempList = this.state.list;
+                  this.tempCompletedList = this.state.completedList;
+                  this.tempCompletedList.push(this.tempList[i]);
+                  this.tempList.splice(i,1);
+                  this.setState({
+                    list: this.tempList,
+                    completedList: this.tempCompletedList,
+                  });
+                  this.change();
+                  console.log(this.state.list)
+                  console.log(this.state.completedList)
+
+                  
+                }}
+              >
+                <Image
+                  source={{
+                    uri:
+                      "https://cdn1.iconfinder.com/data/icons/navigation-elements/512/round-empty-circle-function-512.png",
+                  }}
+                  style={styles.completedButtonImage}
+                />
+              </TouchableHighlight>
+            </View>
+          </View>
+        ))}
+      </View>        
 
           <View style={styles.newListItemContainer}>
             <TextInput
@@ -186,6 +325,54 @@ export default class App extends Component {
               />
             </TouchableHighlight>
           </View>
+
+
+          {this.state.completedFolderOpen && 
+          <View>
+        {this.state.completedList.map((listItem, i) => (
+          <View key={listItem.key} style={styles.completedListContainer}>
+
+              <Text style={styles.listItem}>{listItem.title}</Text>
+            
+
+            <View style={styles.completedButtonContainer}>
+              <TouchableHighlight
+                style={styles.completedButton}
+                onPress={() => {
+                  // alert('Removed from completed list!')
+                  
+
+                  this.tempList = this.state.list;
+                  this.tempCompletedList = this.state.completedList;
+                  this.tempList.push(this.tempCompletedList[i]);
+                  this.tempCompletedList.splice(i,1);
+                  this.setState({
+                    list: this.tempList,
+                    completedList: this.tempCompletedList,
+                  });
+                  this.change();
+                  console.log(this.state.list)
+                  console.log(this.state.completedList)
+
+                  
+                }}
+              >
+                <Image
+                  source={{
+                    uri:
+                      "https://cdn1.iconfinder.com/data/icons/navigation-elements/512/round-empty-circle-function-512.png",
+                  }}
+                  style={styles.completedButtonImage}
+                />
+              </TouchableHighlight>
+            </View>
+          </View>
+        ))}
+      </View> 
+  }
+
+
+
         </ScrollView>
       </View>
     );
@@ -204,6 +391,34 @@ const styles = StyleSheet.create({
     top: 0,
     height: deviceHeight,
   },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  newFolderButton: {
+    width: deviceHeight/8,
+    height: deviceHeight/10,
+    margin: 10,
+  },
+  backButton: {
+    width: deviceHeight/8,
+    height: deviceHeight/10,
+    margin: 10,
+  },
+  backButtonContainer: {
+    flex:1,
+    justifyContent: "flex-start",
+  },
+  folderNameContainer: {
+    flex:1,
+    justifyContent: "center",
+  },
+  newFolderButtonContainer: {
+    flex:1,
+    justifyContent: "flex-end",
+    flexDirection: "row"
+  },
   folderName: {
     textAlign: "center",
     fontWeight: "bold",
@@ -214,6 +429,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     borderTopWidth: 2,
+    borderColor: "black",
+    alignItems: "center",
+  },
+  completedListContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    borderBottomWidth: 2,
     borderColor: "black",
     alignItems: "center",
   },
