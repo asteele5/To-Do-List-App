@@ -26,76 +26,116 @@ let deviceHeight = Dimensions.get("window").height;
 
 export default class App extends Component {
   state = {
-    newListInput: "",
+    input: "",
+
+    completedFolderButtonImage:
+      "https://www.symbols.com/gi.php?type=1&id=1596&i=1",
+
+    currentFolder: -1,
+
+    title: "Folders",
 
     list: [
       {
         key: 1,
-        title: "Tomatoes",
-      },
-      {
-        key: 2,
-        title: "Green Beans",
-      },
-      {
-        key: 3,
-        title: "Carrots",
-      },
-    ],
-
-    completedFolderButtonImage:
-      "https://www.symbols.com/gi.php?type=1&id=1596&i=1",
-    completedFolderOpen: false,
-
-    completedList: [],
-
-    currentFolder: -1,
-
-    folderList: [
-      {
-        key: 1,
         title: "Vegetables",
-        opened: false,
+        list: [
+          {
+            key: 1,
+            title: "Tomatoes",
+          },
+          {
+            key: 2,
+            title: "Green Beans",
+          },
+          {
+            key: 3,
+            title: "Carrots",
+          },
+        ],
+        completedList: [],
+        completedFolderOpen: false,
       },
       {
         key: 2,
         title: "Fruits",
-        opened: false,
+        list: [
+          {
+            key: 1,
+            title: "Apple",
+          },
+          {
+            key: 2,
+            title: "Orange",
+          },
+          {
+            key: 3,
+            title: "Banana",
+          },
+        ],
+        completedList: [],
+        completedFolderOpen: false,
       },
     ],
 
     newFolderVisible: false,
   };
 
-  addNewListItem = () => {
-    if (this.state.newListInput !== "")
+  addNewFolder = () => {
+    if (this.state.input !== "")
       this.state.list.push({
         key: this.state.list.length + 1,
-        title: this.state.newListInput,
-        completed: false,
+        title: this.state.input,
+        opened: false,
+        list: [],
+        completedList: [],
+        completedFolderOpen: false,
       });
     this.setState({
       list: this.state.list,
-      newListInput: "",
+      input: "",
     });
     console.log(this.state.list);
-    this.change();
+    // this.change();
+    console.log(this.state.list);
+  };
+
+  addNewListItem = () => {
+    if (this.state.input !== "")
+      this.state.list[this.state.currentFolder].list.push({
+        key:
+          this.state.list[this.state.currentFolder].list.length +
+          this.state.list[this.state.currentFolder].completedList.length +
+          1,
+        title: this.state.input,
+      });
+    this.setState({
+      list: this.state.list,
+      input: "",
+    });
+    console.log(this.state.list);
+    // this.change();
     console.log(this.state.list);
   };
 
   openCompletedFolder = () => {
     this.removeEverything();
-    if (this.state.completedFolderOpen === false) {
+    this.tempList = this.state.list;
+    if (
+      this.state.list[this.state.currentFolder].completedFolderOpen === false
+    ) {
+      this.tempList[this.state.currentFolder].completedFolderOpen = true;
       this.setState({
         completedFolderButtonImage:
           "https://th.bing.com/th/id/R29edb5fa6f0c4af9363517654a9803a7?rik=UemEtjSc4RupKA&pid=ImgRaw",
-        completedFolderOpen: true,
+        list: this.tempList,
       });
     } else {
+      this.tempList[this.state.currentFolder].completedFolderOpen = false;
       this.setState({
         completedFolderButtonImage:
           "https://www.symbols.com/gi.php?type=1&id=1596&i=1",
-        completedFolderOpen: false,
+        list: this.tempList,
       });
     }
   };
@@ -176,91 +216,57 @@ export default class App extends Component {
           />
 
           <View style={styles.header}>
-            <View style={styles.backButtonContainer}>
-              <Image
-                source={{
-                  uri: "https://image.flaticon.com/icons/png/512/93/93634.png",
-                }}
-                style={styles.backButton}
-              />
-            </View>
+            {this.state.currentFolder >= 0 && (
+              <View style={styles.backButtonContainer}>
+                <TouchableHighlight
+                  onPress={() => {
+                    this.setState({
+                      currentFolder: -1,
+                    });
+                  }}
+                >
+                  <Image
+                    source={{
+                      uri: "https://image.flaticon.com/icons/png/512/93/93634.png",
+                    }}
+                    style={styles.backButton}
+                  />
+                </TouchableHighlight>
+              </View>
+            )}
 
             <View style={styles.folderNameContainer}>
-              <Text style={styles.folderName}>Grocery List</Text>
+              <Text style={styles.folderName}>
+                {this.state.currentFolder < 0
+                  ? this.state.title
+                  : this.state.list[this.state.currentFolder].title}
+              </Text>
             </View>
 
-            <View style={styles.newFolderButtonContainer}>
-              <TouchableHighlight
-                onPress={() => {
-                  alert("new folder created");
-                }}
-              >
-                <Image
-                  source={{
-                    uri: "https://cdn4.iconfinder.com/data/icons/utilities-part-3/64/add_folder-512.png",
-                  }}
-                  style={styles.newFolderButton}
-                />
-              </TouchableHighlight>
-            </View>
+            {this.state.currentFolder >= 0 && (
+              <View style={styles.rightHeaderContainer}></View>
+            )}
           </View>
 
           <ScrollView>
             <View>
-              {this.state.folderList.map((folder, i) => (
-                <View key={folder.key} style={styles.listContainer}>
-                  <Text style={styles.listItem}>{folder.title}</Text>
-
-                  <View style={styles.completedButtonContainer}>
-                    <TouchableHighlight
-                      style={styles.completedButton}
-                      onPress={() => {
-                        this.setState({
-                          currentFolder: i,
-                        });
-                        alert("The value of i is: " + i);
-                      }}
-                    >
-                      <Image
-                        source={{
-                          uri: "https://www.symbols.com/gi.php?type=1&id=1596&i=1",
-                        }}
-                        style={styles.completedButtonImage}
-                      />
-                    </TouchableHighlight>
-                  </View>
-                </View>
-              ))}
-            </View>
-
-            <View>
-              {this.state.currentFolder >= 0 &&
-                this.state.list.map((listItem, i) => (
-                  <View key={listItem.key} style={styles.listContainer}>
-                    <Text style={styles.listItem}>{listItem.title}</Text>
+              {this.state.currentFolder < 0 &&
+                this.state.list.map((folder, i) => (
+                  <View key={folder.key} style={styles.listContainer}>
+                    <Text style={styles.listItem}>{folder.title}</Text>
 
                     <View style={styles.completedButtonContainer}>
                       <TouchableHighlight
                         style={styles.completedButton}
                         onPress={() => {
-                          // alert('Note marked as completed!')
-
-                          this.tempList = this.state.list;
-                          this.tempCompletedList = this.state.completedList;
-                          this.tempCompletedList.push(this.tempList[i]);
-                          this.tempList.splice(i, 1);
                           this.setState({
-                            list: this.tempList,
-                            completedList: this.tempCompletedList,
+                            currentFolder: i,
                           });
-                          this.change();
-                          console.log(this.state.list);
-                          console.log(this.state.completedList);
                         }}
                       >
                         <Image
                           source={{
-                            uri: "https://cdn1.iconfinder.com/data/icons/navigation-elements/512/round-empty-circle-function-512.png",
+                            uri: "https://www.symbols.com/gi.php?type=1&id=1596&i=1",
                           }}
                           style={styles.completedButtonImage}
                         />
@@ -270,12 +276,60 @@ export default class App extends Component {
                 ))}
             </View>
 
+            <View>
+              {this.state.currentFolder >= 0 &&
+                this.state.list[this.state.currentFolder].list.map(
+                  (listItem, i) => (
+                    <View key={listItem.key} style={styles.listContainer}>
+                      <Text style={styles.listItem}>{listItem.title}</Text>
+
+                      <View style={styles.completedButtonContainer}>
+                        <TouchableHighlight
+                          style={styles.completedButton}
+                          onPress={() => {
+                            // alert('Note marked as completed!')
+                            this.tempList = this.state.list;
+                            this.tempCompletedList = this.state.list;
+                            this.tempCompletedList[
+                              this.state.currentFolder
+                            ].completedList.push(
+                              this.tempList[this.state.currentFolder].list[i]
+                            );
+                            this.tempList[this.state.currentFolder].list.splice(
+                              i,
+                              1
+                            );
+                            this.setState({
+                              list: this.tempList,
+                              completedList: this.tempCompletedList,
+                            });
+                            // this.change();
+                            console.log(this.state.list);
+                          }}
+                        >
+                          <Image
+                            source={{
+                              uri: "https://cdn1.iconfinder.com/data/icons/navigation-elements/512/round-empty-circle-function-512.png",
+                            }}
+                            style={styles.completedButtonImage}
+                          />
+                        </TouchableHighlight>
+                      </View>
+                    </View>
+                  )
+                )}
+            </View>
+
             <View style={styles.newListItemContainer}>
               <TextInput
                 style={styles.newItemText}
-                onChangeText={(newListInput) => this.setState({ newListInput })}
-                onSubmitEditing={this.addNewListItem}
-                value={this.state.newListInput}
+                onChangeText={(input) => this.setState({ input })}
+                onSubmitEditing={
+                  this.state.currentFolder < 0
+                    ? this.addNewFolder
+                    : this.addNewListItem
+                }
+                value={this.state.input}
                 placeholder="New Item..."
                 // defaultValue={this.state.newListInput}
                 // style={{ width: 200, height: 44, padding: 8, }}
@@ -284,7 +338,11 @@ export default class App extends Component {
               <View style={styles.newButtonContainer}>
                 <TouchableHighlight
                   style={styles.newButton}
-                  onPress={this.addNewListItem}
+                  onPress={
+                    this.state.currentFolder < 0
+                      ? this.addNewFolder
+                      : this.addNewListItem
+                  }
                 >
                   <Image
                     source={{
@@ -296,59 +354,66 @@ export default class App extends Component {
               </View>
             </View>
 
-            <View style={styles.completedFolderContainer}>
-              <Text style={styles.listItem}>Completed Folder</Text>
-              <TouchableHighlight
-                style={styles.completedFolderButton}
-                onPress={this.openCompletedFolder}
-              >
-                <Image
-                  source={{ uri: this.state.completedFolderButtonImage }}
+            {this.state.currentFolder >= 0 && (
+              <View style={styles.completedFolderContainer}>
+                <Text style={styles.listItem}>Completed Folder</Text>
+                <TouchableHighlight
                   style={styles.completedFolderButton}
-                />
-              </TouchableHighlight>
-            </View>
-
-            {this.state.completedFolderOpen && (
-              <View>
-                {this.state.completedList.map((listItem, i) => (
-                  <View
-                    key={listItem.key}
-                    style={styles.completedListContainer}
-                  >
-                    <Text style={styles.listItem}>{listItem.title}</Text>
-
-                    <View style={styles.completedButtonContainer}>
-                      <TouchableHighlight
-                        style={styles.completedButton}
-                        onPress={() => {
-                          // alert('Removed from completed list!')
-
-                          this.tempList = this.state.list;
-                          this.tempCompletedList = this.state.completedList;
-                          this.tempList.push(this.tempCompletedList[i]);
-                          this.tempCompletedList.splice(i, 1);
-                          this.setState({
-                            list: this.tempList,
-                            completedList: this.tempCompletedList,
-                          });
-                          this.change();
-                          console.log(this.state.list);
-                          console.log(this.state.completedList);
-                        }}
-                      >
-                        <Image
-                          source={{
-                            uri: "https://cdn1.iconfinder.com/data/icons/navigation-elements/512/round-empty-circle-function-512.png",
-                          }}
-                          style={styles.completedButtonImage}
-                        />
-                      </TouchableHighlight>
-                    </View>
-                  </View>
-                ))}
+                  onPress={this.openCompletedFolder}
+                >
+                  <Image
+                    source={{ uri: this.state.completedFolderButtonImage }}
+                    style={styles.completedFolderButton}
+                  />
+                </TouchableHighlight>
               </View>
             )}
+            {this.state.currentFolder >= 0 &&
+              this.state.list[this.state.currentFolder].completedFolderOpen && (
+                <View>
+                  {this.state.list[this.state.currentFolder].completedList.map(
+                    (listItem, i) => (
+                      <View
+                        key={listItem.key}
+                        style={styles.completedListContainer}
+                      >
+                        <Text style={styles.listItem}>{listItem.title}</Text>
+
+                        <View style={styles.completedButtonContainer}>
+                          <TouchableHighlight
+                            style={styles.completedButton}
+                            onPress={() => {
+                              // alert('Removed from completed list!')
+                              this.tempList = this.state.list;
+                              this.tempCompletedList = this.state.list;
+                              this.tempList[this.state.currentFolder].list.push(
+                                this.tempCompletedList[this.state.currentFolder]
+                                  .completedList[i]
+                              );
+                              this.tempCompletedList[
+                                this.state.currentFolder
+                              ].completedList.splice(i, 1);
+                              this.setState({
+                                list: this.tempList,
+                                completedList: this.tempCompletedList,
+                              });
+                              this.change();
+                              console.log(this.state.list);
+                            }}
+                          >
+                            <Image
+                              source={{
+                                uri: "https://cdn1.iconfinder.com/data/icons/navigation-elements/512/round-empty-circle-function-512.png",
+                              }}
+                              style={styles.completedButtonImage}
+                            />
+                          </TouchableHighlight>
+                        </View>
+                      </View>
+                    )
+                  )}
+                </View>
+              )}
           </ScrollView>
         </View>
       </SafeAreaView>
@@ -388,13 +453,11 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
   },
   folderNameContainer: {
-    flex: 1,
+    flex: 2,
     justifyContent: "center",
   },
-  newFolderButtonContainer: {
+  rightHeaderContainer: {
     flex: 1,
-    justifyContent: "flex-end",
-    flexDirection: "row",
   },
   folderName: {
     textAlign: "center",
