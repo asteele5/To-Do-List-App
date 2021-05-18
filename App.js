@@ -18,7 +18,6 @@ import { SwipeListView } from "react-native-swipe-list-view";
 import Swipeable from "react-native-gesture-handler/Swipeable";
 
 const LIST_STORAGE_KEY = "to_do_list_key";
-const COMPLETED_STORAGE_KEY = "completed_key";
 
 let deviceWidth = Dimensions.get("window").width;
 // let deviceHeight = Math.round((Dimensions.width * 9) / 16);
@@ -28,8 +27,11 @@ export default class App extends Component {
   state = {
     input: "",
 
-    completedFolderButtonImage:
+    completedFolderButtonImageClosed:
       "https://www.symbols.com/gi.php?type=1&id=1596&i=1",
+
+    completedFolderButtonImageOpen:
+      "https://th.bing.com/th/id/R29edb5fa6f0c4af9363517654a9803a7?rik=UemEtjSc4RupKA&pid=ImgRaw",
 
     currentFolder: -1,
 
@@ -96,7 +98,7 @@ export default class App extends Component {
       input: "",
     });
     console.log(this.state.list);
-    // this.change();
+    this.change();
     console.log(this.state.list);
   };
 
@@ -114,30 +116,24 @@ export default class App extends Component {
       input: "",
     });
     console.log(this.state.list);
-    // this.change();
+    this.change();
     console.log(this.state.list);
   };
 
   openCompletedFolder = () => {
-    this.removeEverything();
+    // this.removeEverything();
     this.tempList = this.state.list;
     if (
       this.state.list[this.state.currentFolder].completedFolderOpen === false
     ) {
       this.tempList[this.state.currentFolder].completedFolderOpen = true;
-      this.setState({
-        completedFolderButtonImage:
-          "https://th.bing.com/th/id/R29edb5fa6f0c4af9363517654a9803a7?rik=UemEtjSc4RupKA&pid=ImgRaw",
-        list: this.tempList,
-      });
     } else {
       this.tempList[this.state.currentFolder].completedFolderOpen = false;
-      this.setState({
-        completedFolderButtonImage:
-          "https://www.symbols.com/gi.php?type=1&id=1596&i=1",
-        list: this.tempList,
-      });
     }
+    this.setState({
+      list: this.tempList,
+    });
+    this.change();
   };
 
   save = async (items, key) => {
@@ -173,28 +169,10 @@ export default class App extends Component {
     } catch (e) {
       alert("Unable to retrieve list data");
     }
-
-    try {
-      const completedListItems = await AsyncStorage.getItem(
-        COMPLETED_STORAGE_KEY
-      );
-      if (completedListItems !== null) {
-        const parsedCompletedListItems = JSON.parse(completedListItems);
-
-        this.setState({
-          completedList: parsedCompletedListItems,
-        });
-
-        console.log("Retrieved completed list data");
-      }
-    } catch (e) {
-      alert("Unable to retrieve completed list data");
-    }
   };
 
   change = async () => {
     this.save(this.state.list, LIST_STORAGE_KEY);
-    this.save(this.state.completedList, COMPLETED_STORAGE_KEY);
     this.retrieveData();
   };
 
@@ -303,7 +281,7 @@ export default class App extends Component {
                               list: this.tempList,
                               completedList: this.tempCompletedList,
                             });
-                            // this.change();
+                            this.change();
                             console.log(this.state.list);
                           }}
                         >
@@ -362,7 +340,12 @@ export default class App extends Component {
                   onPress={this.openCompletedFolder}
                 >
                   <Image
-                    source={{ uri: this.state.completedFolderButtonImage }}
+                    source={{
+                      uri: this.state.list[this.state.currentFolder]
+                        .completedFolderOpen
+                        ? this.state.completedFolderButtonImageOpen
+                        : this.state.completedFolderButtonImageClosed,
+                    }}
                     style={styles.completedFolderButton}
                   />
                 </TouchableHighlight>
